@@ -1,41 +1,53 @@
 import numpy as np
 import tensorflow as tf
 
+import util
 from models.automata import AutomataModel
 
 ### CONSTANTS ###
 HEIGHT = 64
 WIDTH = 64
+BATCH_SIZE = 4
 STATE_SIZE = 16
 DROP_PROB = 0.5
 TRAIN_STEPS = 100
-GEN_STEPS = 100
-
-def build_cell():
-    """ Build initial cell state """
-    cell_state = np.zeros([HEIGHT, WIDTH, STATE_SIZE])
-    cell_state[HEIGHT // 2, WIDTH // 2, 3:] += 1
-    cell_state = tf.convert_to_tensor(cell_state)
-    return cell_state
+GEN_RANGE = (64, 96)
+EMOJI = "🦎"
+LR = 2e-3
 
 def build_model():
-    """ Build automatat model """
-    model = AutomataModel(HEIGHT, WIDTH, STATE_SIZE, drop_prob=DROP_PROB)
+    model = AutomataModel(STATE_SIZE, drop_prob=DROP_PROB)
     return model
 
-def train(model, train_steps):
-    for i in train_steps:
-        cell = build_cell()
-        for g in GEN_STEPS:
-            cell = model(cell)
-        update_model(model, cell_state)
+def build_optimizer():
+    lr_scheduler = tf.optimizers.schedules.PiecewiseConstantDecay(
+        [2000], [LR, LR * 0.1]
+    )
+    optimizer = tf.keras.optmizers.Adam(lr_sched)
+    return optimizer
 
-def update_model(model):
-    pass
+def calc_loss(cells, image):
+    pixel_delta = util.to_rgba(cells) - image
+    loss = tf.reduce_mean(tf.squared(pixel_delta))
+    return loss
+
+def train(model, optimizer, train_steps, image):
+    for i in tf.range(TRAIN_STEPS):
+        cells = util.make_seeds(image.shape, BATCH_SIZE, STATE_SIZE)
+        gen_steps = tf.random.uniform([], GEN_RANGE[0], GEN_RANGE[1], tf.int32)
+        with tf.GradientTape() as tape:
+            for j in tf.range(steps):
+                cells = model(cells)
+            loss = calc_loss(cells, image)
+        grads = tape.gradient(loss, model.trainable_weights)
+        grads = [g/(tf.norm(g) + 1e-8) for g in grads]
+        optimizer.apply_gradients(zip(grads, model.trainable_weights))
 
 def main():
     model = build_model()
-    train(model, TRAIN_STEPS)
+    optimizer = build_optimizer()
+    image = util.load_emoji(EMOJI)
+    train(model, optimizer, image)
 
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser('Train PPO')
