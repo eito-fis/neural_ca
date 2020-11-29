@@ -1,13 +1,33 @@
+import requests
+from PIL import Image
+from io import BytesIO
+
 import numpy as np
 import tensorflow as tf
 
-def load_image_from_url(url, size=64):
+def load_image_from_url(url):
     """ Loads an image from url """
-    pass
+    response = requests.get(url)
+    img = Image.open(response.raw)
+    return img
+
+def process_image(img, size=64):
+    """ Processes image for training """
+    img.thumbnail((size, size), Image.ANTIALIAS)
+    img = np.float32(img) / 255.0
+    # Scale RGB by alpha
+    # From original implementation, unclear exactly why
+    img[..., :3] *= img[..., 3:]
+    return img
 
 def load_emoji(emoji):
     """ Loads an emoji """
-    pass
+    # Black magic from original implemenetation
+    code = hex(ord(emoji))[2:].lower()
+    url = 'https://github.com/googlefonts/noto-emoji/raw/master/png/128/emoji_u{code}.png'
+    emoji = load_image_from_url(url)
+    processed_emoji = process_image(emoji)
+    return processed_emoji
 
 def make_seeds(shape, batch_size, state_size):
     """ Makes batch of seeds """
