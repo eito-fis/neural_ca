@@ -8,7 +8,7 @@ import tensorflow as tf
 def load_image_from_url(url):
     """ Loads an image from url """
     response = requests.get(url)
-    img = Image.open(response.raw)
+    img = Image.open(BytesIO(response.content))
     return img
 
 def process_image(img, size=64):
