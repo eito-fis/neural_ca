@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
-import util
-from models.automata import AutomataModel
+from neural_ca import util
+from neural_ca.models.automata import AutomataModel
 
 ### CONSTANTS ###
 HEIGHT = 64
@@ -23,34 +23,34 @@ def build_optimizer():
     lr_scheduler = tf.optimizers.schedules.PiecewiseConstantDecay(
         [2000], [LR, LR * 0.1]
     )
-    optimizer = tf.keras.optmizers.Adam(lr_sched)
+    optimizer = tf.keras.optimizers.Adam(lr_scheduler)
     return optimizer
 
 def calc_loss(cells, image):
     pixel_delta = util.to_rgba(cells) - image
-    loss = tf.reduce_mean(tf.squared(pixel_delta))
+    loss = tf.reduce_mean(tf.square(pixel_delta))
     return loss
 
 def train(model, optimizer, train_steps, image):
-    for i in tf.range(TRAIN_STEPS):
+    for i in tf.range(train_steps):
         cells = util.make_seeds(image.shape, BATCH_SIZE, STATE_SIZE)
         gen_steps = tf.random.uniform([], GEN_RANGE[0], GEN_RANGE[1], tf.int32)
         with tf.GradientTape() as tape:
-            for j in tf.range(steps):
+            for j in tf.range(gen_steps):
                 cells = model(cells)
             loss = calc_loss(cells, image)
         grads = tape.gradient(loss, model.trainable_weights)
         grads = [g/(tf.norm(g) + 1e-8) for g in grads]
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
 
-def main():
+def main(train_steps):
     model = build_model()
     optimizer = build_optimizer()
     image = util.load_emoji(EMOJI)
-    train(model, optimizer, image)
+    train(model, optimizer, train_steps, image)
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser('Train PPO')
+    # parser = argparse.ArgumentParser('Train Neural CA')
 
     # parser.add_argument(
     #     "--actor_weights",
@@ -68,5 +68,5 @@ if __name__ == '__main__':
 
     #logging.getLogger().setLevel(logging.INFO)
     # main(args)
-    main()
+    main(TRAIN_STEPS)
 
