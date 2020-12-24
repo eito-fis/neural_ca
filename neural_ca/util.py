@@ -22,19 +22,21 @@ def process_image(img, size=64):
 
 def load_emoji(emoji):
     """ Loads an emoji """
+
     # Black magic from original implemenetation
     code = hex(ord(emoji))[2:].lower()
-    url = 'https://github.com/googlefonts/noto-emoji/raw/master/png/128/emoji_u{code}.png'
+
+    url = f'https://github.com/googlefonts/noto-emoji/raw/master/png/128/emoji_u{code}.png'
     emoji = load_image_from_url(url)
     processed_emoji = process_image(emoji)
     return processed_emoji
 
 def make_seeds(shape, batch_size, state_size):
     """ Makes batch of seeds """
-    assert len(shape == 3)
+    assert len(shape) == 3
     height, width = shape[:2]
     seeds = np.zeros([batch_size, height, width, state_size])
-    seeds[:, HEIGHT // 2, WIDTH // 2, 3:] += 1
+    seeds[:, height // 2, width // 2, 3:] += 1
     seeds = tf.convert_to_tensor(seeds)
     return seeds
 
