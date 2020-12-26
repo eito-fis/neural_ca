@@ -15,16 +15,8 @@ GEN_RANGE = (64, 96)
 EMOJI = "🦎"
 LR = 2e-3
 
-def build_model():
-    model = AutomataModel(STATE_SIZE, drop_prob=DROP_PROB)
-    return model
-
-def build_optimizer():
-    lr_scheduler = tf.optimizers.schedules.PiecewiseConstantDecay(
-        [2000], [LR, LR * 0.1]
-    )
-    optimizer = tf.keras.optimizers.Adam(lr_scheduler)
-    return optimizer
+def log(i, loss, val_video):
+    pass
 
 def calc_loss(cells, image):
     pixel_delta = util.to_rgba(cells) - image
@@ -43,30 +35,46 @@ def train(model, optimizer, train_steps, image):
         grads = [g/(tf.norm(g) + 1e-8) for g in grads]
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
 
-def main(train_steps):
+def build_model():
+    model = AutomataModel(STATE_SIZE, drop_prob=DROP_PROB)
+    return model
+
+def build_optimizer():
+    lr_scheduler = tf.optimizers.schedules.PiecewiseConstantDecay(
+        [2000], [LR, LR * 0.1]
+    )
+    optimizer = tf.keras.optimizers.Adam(lr_scheduler)
+    return optimizer
+
+def main(args):
+    if args.wandb:
+        import wandb
+        wandb.init(
+            project=args.wandb_project,
+            name=args.wandb_name
+        )
+
     model = build_model()
     optimizer = build_optimizer()
     image = util.load_emoji(EMOJI)
-    train(model, optimizer, train_steps, image)
+    train(model, optimizer, args.train_steps, image)
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser('Train Neural CA')
+    parser = argparse.ArgumentParser('Train Neural CA')
 
-    # parser.add_argument(
-    #     "--actor_weights",
-    #     type=str,
-    #     default=None)
-    # parser.add_argument(
-    #     "--env",
-    #     type=str,
-    #     default="BipedalWalker-v3")
-    # parser.add_argument(
-    #     '--gpu',
-    #     default=False,
-    #     action='store_true')
-    # args = parser.parse_args()
+    parser.add_argument(
+        "--wandb_project",
+        type=str,
+        default="neural-ca")
+    parser.add_argument(
+        "--wandb_name",
+        type=str,
+        default=None)
 
-    #logging.getLogger().setLevel(logging.INFO)
-    # main(args)
-    main(TRAIN_STEPS)
+    parser.add_argument(
+        "--train_steps",
+        type=int,
+        default=8000)
+
+    main(args)
 
