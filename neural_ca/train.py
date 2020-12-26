@@ -1,3 +1,4 @@
+import wandb
 import numpy as np
 import tensorflow as tf
 
@@ -10,13 +11,36 @@ WIDTH = 64
 BATCH_SIZE = 4
 STATE_SIZE = 16
 DROP_PROB = 0.5
-TRAIN_STEPS = 100
+VAL_STEPS = 250
+VIDEO_STEPS = 256
 GEN_RANGE = (64, 96)
 EMOJI = "🦎"
 LR = 2e-3
 
-def log(i, loss, val_video):
-    pass
+def make_video(model, image):
+    def process_cell(cell):
+        # Remove batch dimension
+        np_cell = np.asarray(cell)[0, :, :, :]
+        # From channel last to channel first for wandb
+        swap_cell = np.moveaxis(np_cell, 0, 2)
+        return swap_cell
+
+    cell = util.make_seeds(image.shape, 1, STATE_SIZE)
+    video = [process_cell(cell)]
+    for i in range(VIDEO_STEPS):
+        cell = model(cell)
+        video.append(process_cell(cell))
+
+def log(i, loss, grads, model, image):
+    log_data = {
+        "step": i,
+        "loss": loss,
+        "grads": wandb.Histogram(grads)
+    }
+    if i % VAL_STEPS == 0:
+        video = make_video(model, image)
+        log_data["video"] = wandb.Video(video)
+    wandb.log(log_data)
 
 def calc_loss(cells, image):
     pixel_delta = util.to_rgba(cells) - image
@@ -34,6 +58,7 @@ def train(model, optimizer, train_steps, image):
         grads = tape.gradient(loss, model.trainable_weights)
         grads = [g/(tf.norm(g) + 1e-8) for g in grads]
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
+        log(i, loss, grads, model, image)
 
 def build_model():
     model = AutomataModel(STATE_SIZE, drop_prob=DROP_PROB)
@@ -47,12 +72,10 @@ def build_optimizer():
     return optimizer
 
 def main(args):
-    if args.wandb:
-        import wandb
-        wandb.init(
-            project=args.wandb_project,
-            name=args.wandb_name
-        )
+    wandb.init(
+        project=args.wandb_project,
+        name=args.wandb_name
+    )
 
     model = build_model()
     optimizer = build_optimizer()
