@@ -1,3 +1,6 @@
+import sys
+import argparse
+
 import wandb
 import numpy as np
 import tensorflow as tf
@@ -17,28 +20,29 @@ GEN_RANGE = (64, 96)
 EMOJI = "🦎"
 LR = 2e-3
 
-def make_video(model, image):
+def make_video(model, image, steps):
     def process_cell(cell):
-        # Remove batch dimension
-        np_cell = np.asarray(cell)[0, :, :, :]
+        rgb_cell = util.to_rgb(np.asarray(cell))
+        unbatched_cell = rgb_cell[0, :, :, :]
         # From channel last to channel first for wandb
-        swap_cell = np.moveaxis(np_cell, 0, 2)
+        swap_cell = np.moveaxis(unbatched_cell, 2, 0)
         return swap_cell
 
     cell = util.make_seeds(image.shape, 1, STATE_SIZE)
     video = [process_cell(cell)]
-    for i in range(VIDEO_STEPS):
+    for i in range(steps - 1):
         cell = model(cell)
         video.append(process_cell(cell))
+    return np.stack(video, axis=0)
 
-def log(i, loss, grads, model, image):
+def log(i, loss, model, image):
     log_data = {
         "step": i,
         "loss": loss,
-        "grads": wandb.Histogram(grads)
     }
     if i % VAL_STEPS == 0:
-        video = make_video(model, image)
+        video = make_video(model, image, VIDEO_STEPS)
+        print(video)
         log_data["video"] = wandb.Video(video)
     wandb.log(log_data)
 
@@ -58,7 +62,7 @@ def train(model, optimizer, train_steps, image):
         grads = tape.gradient(loss, model.trainable_weights)
         grads = [g/(tf.norm(g) + 1e-8) for g in grads]
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
-        log(i, loss, grads, model, image)
+        log(i, loss, model, image)
 
 def build_model():
     model = AutomataModel(STATE_SIZE, drop_prob=DROP_PROB)
@@ -72,6 +76,21 @@ def build_optimizer():
     return optimizer
 
 def main(args):
+    parser = argparse.ArgumentParser('Train Neural CA')
+    parser.add_argument(
+        "--wandb_project",
+        type=str,
+        default="neural-ca")
+    parser.add_argument(
+        "--wandb_name",
+        type=str,
+        default=None)
+    parser.add_argument(
+        "--train_steps",
+        type=int,
+        default=8000)
+    args = parser.parse_args(args)
+
     wandb.init(
         project=args.wandb_project,
         name=args.wandb_name
@@ -83,21 +102,5 @@ def main(args):
     train(model, optimizer, args.train_steps, image)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser('Train Neural CA')
-
-    parser.add_argument(
-        "--wandb_project",
-        type=str,
-        default="neural-ca")
-    parser.add_argument(
-        "--wandb_name",
-        type=str,
-        default=None)
-
-    parser.add_argument(
-        "--train_steps",
-        type=int,
-        default=8000)
-
-    main(args)
+    main(sys.argv[1:])
 

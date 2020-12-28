@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 
 from context import neural_ca
-from neural_ca.train import (build_model, build_optimizer, calc_loss, train,
-                             main)
+from neural_ca.train import (make_video, build_model, build_optimizer,
+                             calc_loss, train, main)
 from neural_ca.util import load_emoji
 
 @pytest.mark.train
@@ -36,5 +36,13 @@ class TestTrain:
         assert loss_ba != 0
     
     def test_main(self):
-        main(5)
+        args = ["--wandb_project", "unittest", "--train_steps", "5"]
+        main(args)
         assert True
+
+    @pytest.mark.parametrize("size, steps", [(32, 128), (64, 256), (128, 512)])
+    def test_make_video(self, size, steps):
+        model = build_model()
+        img = np.zeros((size, size, 4))
+        video = make_video(model, img, steps)
+        assert video.shape == (steps, 3, size, size)
