@@ -3,6 +3,7 @@ import argparse
 
 import wandb
 import numpy as np
+from tqdm import tqdm
 import tensorflow as tf
 
 from neural_ca import util
@@ -52,7 +53,7 @@ def calc_loss(cells, image):
     return loss
 
 def train(model, optimizer, train_steps, image):
-    for i in tf.range(train_steps):
+    for i in tqdm(tf.range(train_steps)):
         cells = util.make_seeds(image.shape, BATCH_SIZE, STATE_SIZE)
         gen_steps = tf.random.uniform([], GEN_RANGE[0], GEN_RANGE[1], tf.int32)
         with tf.GradientTape() as tape:
