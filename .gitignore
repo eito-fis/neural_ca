@@ -131,5 +131,7 @@ dmypy.json
 # Vim
 *.swp
 
+# Local data
 wandb/*
 venv/*
+logging/*

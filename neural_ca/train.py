@@ -8,6 +8,7 @@ import wandb
 import numpy as np
 from tqdm import tqdm
 import tensorflow as tf
+import moviepy.editor as mpy
 
 from neural_ca import util
 from neural_ca.models.automata import AutomataModel
@@ -29,16 +30,14 @@ def make_video(model, image, steps):
         rgb_cell = util.to_rgb(cell.numpy()).numpy()
         clipped_cell = np.uint8(rgb_cell.clip(0, 1) * 255)
         unbatched_cell = clipped_cell[0, :, :, :]
-        # From channel last to channel first for wandb
-        swap_cell = np.moveaxis(unbatched_cell, 2, 0)
-        return swap_cell
+        return unbatched_cell
 
     cell = util.make_seeds(image.shape, 1, STATE_SIZE)
     video = [process_cell(cell)]
     for i in range(steps - 1):
         cell = model(cell)
         video.append(process_cell(cell))
-    return np.stack(video, axis=0)
+    return video
 
 def log(i, loss, model, image):
     log_data = {
@@ -47,7 +46,10 @@ def log(i, loss, model, image):
     }
     if i % VAL_STEPS == 0:
         video = make_video(model, image, VIDEO_STEPS)
-        log_data["video"] = wandb.Video(video, format="webm", fps=8)
+        clip = mpy.ImageSequenceClip(video, fps=16)
+        filename = os.path.join("logging", wandb.run.name, str(i.numpy()) + ".mp4")
+        clip.write_videofile(filename, logger=None) 
+        log_data["video"] = wandb.Video(filename)
         tqdm.write(f" - Loss: {loss}, video logged")
     wandb.log(log_data)
 
@@ -83,13 +85,13 @@ def build_optimizer():
 def main(args):
     parser = argparse.ArgumentParser('Train Neural CA')
     parser.add_argument(
+        "--run_name",
+        type=str,
+        default=None)
+    parser.add_argument(
         "--wandb_project",
         type=str,
         default="neural-ca")
-    parser.add_argument(
-        "--wandb_name",
-        type=str,
-        default=None)
     parser.add_argument(
         "--train_steps",
         type=int,
@@ -98,12 +100,13 @@ def main(args):
 
     wandb.init(
         project=args.wandb_project,
-        name=args.wandb_name
+        name=args.run_name
     )
 
     model = build_model()
     optimizer = build_optimizer()
     image = util.load_emoji(EMOJI)
+    os.makedirs(os.path.join("logging", wandb.run.name), exist_ok=True)
     train(model, optimizer, args.train_steps, image)
 
 if __name__ == '__main__':
