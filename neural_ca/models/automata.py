@@ -47,6 +47,7 @@ class AutomataModel(tf.keras.Model):
         filters = tf.repeat(filters[:, :, None, :], self.state_size, axis=2)
         return filters
 
+    # @tf.function
     def build_stochastic_mask(self, cell_state):
         """ Builds stochastic mask, randomly drops cells with DROP_PROB
 
@@ -58,6 +59,7 @@ class AutomataModel(tf.keras.Model):
         mask = tf.cast(mask <= self.drop_prob, tf.float32)
         return mask
 
+    # @tf.function
     def build_live_mask(self, cell_state):
         """ Builds live mask, drops cells without living neighbhour
 
@@ -74,6 +76,7 @@ class AutomataModel(tf.keras.Model):
         mask = mask >= 0.1
         return mask
 
+    # @tf.function
     def call(self, cell_state):
         """ Updates the cell state a single step
             

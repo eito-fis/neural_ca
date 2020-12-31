@@ -40,8 +40,15 @@ def make_seeds(shape, batch_size, state_size):
     seeds = tf.convert_to_tensor(seeds)
     return seeds
 
-def to_rgb(image):
-    return image[:, :, :, :3]
+def to_alpha(image):
+    return tf.clip_by_value(image[..., 3:4], 0.0, 1.0)
 
 def to_rgba(image):
     return image[:, :, :, :4]
+
+def to_rgb(image):
+    rgb = image[:, :, :, :3]
+    alpha = to_alpha(image)
+    return 1.0 - alpha + rgb
+
+
