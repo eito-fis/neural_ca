@@ -1,10 +1,12 @@
+import os
+
 import pytest
 import numpy as np
 
 from context import neural_ca
+from neural_ca.util import load_emoji
 from neural_ca.train import (make_video, build_model, build_optimizer,
                              calc_loss, train, main)
-from neural_ca.util import load_emoji
 
 @pytest.mark.train
 class TestTrain:
@@ -36,6 +38,7 @@ class TestTrain:
         assert loss_ba != 0
     
     def test_main(self):
+        os.environ['WANDB_MODE'] = 'dryrun'
         args = ["--wandb_project", "unittest", "--train_steps", "5"]
         main(args)
         assert True

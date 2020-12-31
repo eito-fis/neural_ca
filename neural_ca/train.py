@@ -1,5 +1,8 @@
+import os
 import sys
+import logging
 import argparse
+import contextlib
 
 import wandb
 import numpy as np
@@ -12,7 +15,7 @@ from neural_ca.models.automata import AutomataModel
 ### CONSTANTS ###
 HEIGHT = 64
 WIDTH = 64
-BATCH_SIZE = 4
+BATCH_SIZE = 8
 STATE_SIZE = 16
 DROP_PROB = 0.5
 VAL_STEPS = 250
@@ -23,8 +26,9 @@ LR = 2e-3
 
 def make_video(model, image, steps):
     def process_cell(cell):
-        rgb_cell = util.to_rgb(np.asarray(cell))
-        unbatched_cell = rgb_cell[0, :, :, :]
+        rgb_cell = util.to_rgb(cell.numpy()).numpy()
+        clipped_cell = np.uint8(rgb_cell.clip(0, 1) * 255)
+        unbatched_cell = clipped_cell[0, :, :, :]
         # From channel last to channel first for wandb
         swap_cell = np.moveaxis(unbatched_cell, 2, 0)
         return swap_cell
@@ -43,8 +47,8 @@ def log(i, loss, model, image):
     }
     if i % VAL_STEPS == 0:
         video = make_video(model, image, VIDEO_STEPS)
-        print(video)
-        log_data["video"] = wandb.Video(video)
+        log_data["video"] = wandb.Video(video, format="webm", fps=8)
+        tqdm.write(f" - Loss: {loss}, video logged")
     wandb.log(log_data)
 
 def calc_loss(cells, image):
@@ -53,7 +57,7 @@ def calc_loss(cells, image):
     return loss
 
 def train(model, optimizer, train_steps, image):
-    for i in tqdm(tf.range(train_steps)):
+    for i in tqdm(tf.range(train_steps), desc="Training ", leave=True):
         cells = util.make_seeds(image.shape, BATCH_SIZE, STATE_SIZE)
         gen_steps = tf.random.uniform([], GEN_RANGE[0], GEN_RANGE[1], tf.int32)
         with tf.GradientTape() as tape:
@@ -89,7 +93,7 @@ def main(args):
     parser.add_argument(
         "--train_steps",
         type=int,
-        default=8000)
+        default=2000)
     args = parser.parse_args(args)
 
     wandb.init(
@@ -103,5 +107,7 @@ def main(args):
     train(model, optimizer, args.train_steps, image)
 
 if __name__ == '__main__':
+    import logging
+    logging.getLogger().setLevel(logging.ERROR)
     main(sys.argv[1:])
 
