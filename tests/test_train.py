@@ -39,7 +39,8 @@ class TestTrain:
     
     def test_main(self):
         os.environ['WANDB_MODE'] = 'dryrun'
-        args = ["--wandb_project", "unittest", "--train_steps", "5"]
+        args = ["--wandb_project", "unittest", "--train_steps", "5",
+                "--run_name", "unittest"]
         main(args)
         assert True
 
@@ -48,4 +49,6 @@ class TestTrain:
         model = build_model()
         img = np.zeros((size, size, 4))
         video = make_video(model, img, steps)
-        assert video.shape == (steps, 3, size, size)
+        assert len(video) == steps
+        for frame in video:
+            assert frame.shape == (size, size, 3)

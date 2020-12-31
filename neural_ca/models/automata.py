@@ -76,7 +76,7 @@ class AutomataModel(tf.keras.Model):
         mask = mask >= 0.1
         return mask
 
-    @tf.function
+    # @tf.function
     def call(self, cell_state):
         """ Updates the cell state a single step
             

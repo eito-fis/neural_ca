@@ -110,7 +110,5 @@ def main(args):
     train(model, optimizer, args.train_steps, image)
 
 if __name__ == '__main__':
-    import logging
-    logging.getLogger().setLevel(logging.ERROR)
     main(sys.argv[1:])
 
