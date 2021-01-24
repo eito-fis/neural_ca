@@ -50,7 +50,7 @@ def log(i, loss, model, image):
         filename = os.path.join("logging", wandb.run.name, str(i.numpy()) + ".mp4")
         clip.write_videofile(filename, logger=None) 
         log_data["video"] = wandb.Video(filename)
-        tqdm.write(f" - Loss: {loss}, video logged")
+        tqdm.write(f" - Loss: {loss}, {filename} logged")
     wandb.log(log_data)
 
 def calc_loss(cells, image):
