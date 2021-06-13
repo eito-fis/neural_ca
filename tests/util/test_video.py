@@ -1,9 +1,12 @@
 import pytest
 import numpy as np
 
-from context import neural_ca
 from neural_ca.train import build_model
-from neural_ca.util.video import make_video
+from neural_ca.util.video import make_video, load_video
+
+@pytest.fixture
+def video_path():
+    return "data/waves.mp4"
 
 @pytest.mark.utils
 class TestVideo:
@@ -17,3 +20,7 @@ class TestVideo:
         assert len(video) == steps
         for frame in video:
             assert frame.shape == (size, size, 3)
+
+    @pytest.mark.parametrize("size", [8, 32, 64])
+    def test_load_video(self, size, video_path):
+        load_video(video_path, size=size)

@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
 
-from context import neural_ca
 from neural_ca.util.image import (load_image_from_url, process_image, load_emoji,
                             make_seeds, to_rgb, to_rgba)
 

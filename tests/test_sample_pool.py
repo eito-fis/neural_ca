@@ -1,7 +1,6 @@
 import pytest
 import tensorflow as tf
 
-from context import neural_ca
 from neural_ca import util
 from neural_ca.sample_pool import SamplePool
 
