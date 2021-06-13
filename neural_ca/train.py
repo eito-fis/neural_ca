@@ -1,8 +1,6 @@
 import os
 import sys
-import logging
 import argparse
-import contextlib
 
 import wandb
 import numpy as np
@@ -50,7 +48,7 @@ def log(i, loss, model, image):
         video = make_video(model, image, VIDEO_STEPS)
         clip = mpy.ImageSequenceClip(video, fps=16)
         filename = os.path.join("logging", wandb.run.name, str(i.numpy()) + ".mp4")
-        clip.write_videofile(filename, logger=None) 
+        clip.write_videofile(filename, logger=None)
         log_data["video"] = wandb.Video(filename)
         tqdm.write(f" - Loss: {loss}, {filename} logged")
     wandb.log(log_data)
@@ -119,4 +117,3 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
-
