@@ -27,14 +27,14 @@ POOL_SIZE = 1024
 
 def make_video(model, image, steps):
     def process_cell(cell):
-        rgb_cell = util.to_rgb(cell.numpy()).numpy()
+        rgb_cell = util.image.to_rgb(cell.numpy()).numpy()
         clipped_cell = np.uint8(rgb_cell.clip(0, 1) * 255)
         unbatched_cell = clipped_cell[0, :, :, :]
         return unbatched_cell
 
-    cell = util.make_seeds(image.shape, 1, STATE_SIZE)
+    cell = util.image.make_seeds(image.shape, 1, STATE_SIZE)
     video = [process_cell(cell)]
-    for i in range(steps - 1):
+    for _ in range(steps - 1):
         cell = model(cell)
         video.append(process_cell(cell))
     return video
@@ -54,7 +54,7 @@ def log(i, loss, model, image):
     wandb.log(log_data)
 
 def calc_loss(cells, image):
-    pixel_delta = util.to_rgba(cells) - image
+    pixel_delta = util.image.to_rgba(cells) - image
     loss = tf.reduce_mean(tf.square(pixel_delta))
     return loss
 
@@ -110,7 +110,7 @@ def main(args):
 
     model = build_model()
     optimizer = build_optimizer()
-    image = util.load_emoji(EMOJI)
+    image = util.image.load_emoji(EMOJI)
     pool = build_pool(image.shape)
     os.makedirs(os.path.join("logging", wandb.run.name), exist_ok=True)
     train(model, optimizer, args.train_steps, image, pool)

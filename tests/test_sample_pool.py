@@ -40,7 +40,7 @@ class TestSamplePool:
         pool.pool = tf.ones(pool.pool.shape)
 
         sample, _ = pool.sample(1)
-        fresh_seed = util.make_seeds(shape, 1, state_size)
+        fresh_seed = util.image.make_seeds(shape, 1, state_size)
 
         assert sample.shape == fresh_seed.shape
         assert tf.math.reduce_all(tf.math.equal(sample, fresh_seed))

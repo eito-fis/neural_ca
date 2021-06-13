@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 
 from context import neural_ca
-from neural_ca.util import load_emoji
+from neural_ca.util.image import load_emoji
 from neural_ca.train import (make_video, build_model, build_optimizer,
                              build_pool, calc_loss, main)
 
