@@ -2,8 +2,10 @@ import pytest
 import numpy as np
 
 from context import neural_ca
+from neural_ca.train import build_model
 from neural_ca.util.image import (load_image_from_url, process_image, load_emoji,
                             make_seeds, to_rgb, to_rgba)
+from neural_ca.util.video import make_video
 
 @pytest.fixture
 def example_emoji():
@@ -65,3 +67,13 @@ class TestImages:
     def test_to_rgba(self, example_processed_image_fixed):
         rgba_image = to_rgba(example_processed_image_fixed[None, :])
         assert rgba_image.shape[3] == 4
+
+    @pytest.mark.parametrize("size, steps, state_size",
+                             [(32, 128, 4), (64, 256, 8), (128, 512, 16)])
+    def test_make_video(self, size, steps, state_size):
+        model = build_model()
+        img = np.zeros((size, size, 4))
+        video = make_video(model, img, steps, 16)
+        assert len(video) == steps
+        for frame in video:
+            assert frame.shape == (size, size, 3)

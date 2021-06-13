@@ -3,7 +3,6 @@ import sys
 import argparse
 
 import wandb
-import numpy as np
 from tqdm import tqdm
 import tensorflow as tf
 import moviepy.editor as mpy
@@ -25,27 +24,13 @@ EMOJI = "🦎"
 LR = 2e-3
 POOL_SIZE = 1024
 
-def make_video(model, image, steps):
-    def process_cell(cell):
-        rgb_cell = util.image.to_rgb(cell.numpy()).numpy()
-        clipped_cell = np.uint8(rgb_cell.clip(0, 1) * 255)
-        unbatched_cell = clipped_cell[0, :, :, :]
-        return unbatched_cell
-
-    cell = util.image.make_seeds(image.shape, 1, STATE_SIZE)
-    video = [process_cell(cell)]
-    for _ in range(steps - 1):
-        cell = model(cell)
-        video.append(process_cell(cell))
-    return video
-
 def log(i, loss, model, image):
     log_data = {
         "step": i,
         "loss": loss,
     }
     if i % VAL_STEPS == 0:
-        video = make_video(model, image, VIDEO_STEPS)
+        video = util.video.make_video(model, image, VIDEO_STEPS, STATE_SIZE)
         clip = mpy.ImageSequenceClip(video, fps=16)
         filename = os.path.join("logging", wandb.run.name, str(i.numpy()) + ".mp4")
         clip.write_videofile(filename, logger=None)

@@ -5,8 +5,7 @@ import numpy as np
 
 from context import neural_ca
 from neural_ca.util.image import load_emoji
-from neural_ca.train import (make_video, build_model, build_optimizer,
-                             build_pool, calc_loss, main)
+from neural_ca.train import (build_model, build_optimizer, build_pool, calc_loss, main)
 
 @pytest.mark.train
 class TestTrain:
@@ -47,12 +46,3 @@ class TestTrain:
                 "--run_name", "unittest"]
         main(args)
         assert True
-
-    @pytest.mark.parametrize("size, steps", [(32, 128), (64, 256), (128, 512)])
-    def test_make_video(self, size, steps):
-        model = build_model()
-        img = np.zeros((size, size, 4))
-        video = make_video(model, img, steps)
-        assert len(video) == steps
-        for frame in video:
-            assert frame.shape == (size, size, 3)
