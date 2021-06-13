@@ -26,7 +26,8 @@ def load_emoji(emoji):
     # Black magic from original implemenetation
     code = hex(ord(emoji))[2:].lower()
 
-    url = f'https://github.com/googlefonts/noto-emoji/raw/master/png/128/emoji_u{code}.png'
+    url = ('https://raw.githubusercontent.com/googlefonts/noto-emoji/'
+           f'948b1a7f1ed4ec7e27930ad8e027a740db3fe25e/png/128/emoji_u{code}.png')
     emoji = load_image_from_url(url)
     processed_emoji = process_image(emoji)
     return processed_emoji
@@ -50,5 +51,3 @@ def to_rgb(image):
     rgb = image[:, :, :, :3]
     alpha = to_alpha(image)
     return 1.0 - alpha + rgb
-
-

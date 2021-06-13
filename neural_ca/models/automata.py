@@ -10,7 +10,7 @@ class AutomataModel(tf.keras.Model):
         filters (tensor): Stack of perception filters, of shape [HEIGHT, WIDTH,
             STATE_SIZE, 3]
         dense (keras.Conv2D): First dense layer for each pixel, implemented as
-            a convlutional layer with 128 filers 
+            a convlutional layer with 128 filers
         out (keras.Conv2D): Output dense layer for each pixel, implemented as
             as convolutional layer with 16 filters
     """
@@ -21,7 +21,7 @@ class AutomataModel(tf.keras.Model):
         assert self.state_size >= 4, "Must have state size of at least 4!"
 
         self.filters = self.build_filters()
-        self.filters.trainable = False 
+        self.filters.trainable = False
         self.dense = tf.keras.layers.Conv2D(
             filters=128,
             kernel_size=1,
@@ -79,7 +79,7 @@ class AutomataModel(tf.keras.Model):
     # @tf.function
     def call(self, cell_state):
         """ Updates the cell state a single step
-            
+
         Args:
             cell_state (tensor): Array or tensor of shape [batch size, height,
                 width, state size]
