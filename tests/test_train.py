@@ -6,7 +6,7 @@ import numpy as np
 from context import neural_ca
 from neural_ca.util import load_emoji
 from neural_ca.train import (make_video, build_model, build_optimizer,
-                             build_pool, calc_loss, train, main)
+                             build_pool, calc_loss, main)
 
 @pytest.mark.train
 class TestTrain:
@@ -21,7 +21,7 @@ class TestTrain:
     def test_build_optimizer(self):
         build_pool((64, 64, 3))
         assert True
-    
+
     def test_calc_loss(self):
         def emoji_and_cell(emoji):
             emoji = load_emoji(emoji)
@@ -40,7 +40,7 @@ class TestTrain:
         assert loss_b == 0
         assert loss_ab != 0
         assert loss_ba != 0
-    
+
     def test_main(self):
         os.environ['WANDB_MODE'] = 'dryrun'
         args = ["--wandb_project", "unittest", "--train_steps", "5",

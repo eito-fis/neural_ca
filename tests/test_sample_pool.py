@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 import tensorflow as tf
 
 from context import neural_ca
@@ -33,7 +32,7 @@ class TestSamplePool:
     def test_sample_batch_size_error(self, make_pool):
         pool = make_pool(16, (64, 64, 3), 16)
         with pytest.raises(AssertionError):
-            sample, _ = pool.sample(100)
+            pool.sample(100)
 
     def test_sample_fresh_seed(self, make_pool):
         shape, state_size = (64, 64, 3), 16
@@ -71,4 +70,3 @@ class TestSamplePool:
 
         assert sample.shape == sample_in_pool.shape
         assert tf.math.reduce_all(tf.math.equal(sample, sample_in_pool))
-

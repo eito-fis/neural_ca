@@ -65,7 +65,7 @@ def train(model, optimizer, train_steps, image, pool):
         cells, idxs = pool.sample(BATCH_SIZE)
         gen_steps = tf.random.uniform([], GEN_RANGE[0], GEN_RANGE[1], tf.int32)
         with tf.GradientTape() as tape:
-            for j in tf.range(gen_steps):
+            for _ in tf.range(gen_steps):
                 cells = model(cells)
             loss = calc_loss(cells, image)
         grads = tape.gradient(loss, model.trainable_weights)
