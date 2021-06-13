@@ -18,7 +18,7 @@ class TestTrain:
         build_optimizer()
         assert True
 
-    def test_build_optimizer(self):
+    def test_build_pool(self):
         build_pool((64, 64, 3))
         assert True
 
