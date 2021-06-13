@@ -36,7 +36,7 @@ class TestImages:
                              indirect=["example_processed_image"])
     def test_process_image_size(self, example_processed_image, s):
         assert example_processed_image.shape == (s, s, 4)
-       
+
     # This is dumb but nothing else works
     @pytest.mark.parametrize("example_processed_image, s",
                              [(4, 4), (16, 16), (64, 64)],

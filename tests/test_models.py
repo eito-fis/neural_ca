@@ -24,7 +24,7 @@ class TestAutomataModel:
         cell_state = np.ones([b, s, s, example_automata_model.state_size])
         mask = example_automata_model.build_stochastic_mask(cell_state).numpy()
         assert mask.shape == (b, s, s, 1)
-    
+
     @pytest.mark.parametrize("b, s", [(256, 4), (64, 16), (16, 64), (1, 256)])
     def test_build_live_mask_shape(self, example_automata_model, b, s):
         cell_state = np.ones([b, s, s, example_automata_model.state_size])

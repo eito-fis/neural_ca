@@ -26,18 +26,19 @@ def load_emoji(emoji):
     # Black magic from original implemenetation
     code = hex(ord(emoji))[2:].lower()
 
-    url = f'https://github.com/googlefonts/noto-emoji/raw/master/png/128/emoji_u{code}.png'
+    url = ('https://raw.githubusercontent.com/googlefonts/noto-emoji/'
+           f'948b1a7f1ed4ec7e27930ad8e027a740db3fe25e/png/128/emoji_u{code}.png')
     emoji = load_image_from_url(url)
     processed_emoji = process_image(emoji)
     return processed_emoji
 
 def make_seeds(shape, batch_size, state_size):
     """ Makes batch of seeds """
-    assert len(shape) == 3
+    assert len(shape) == 2 or len(shape) == 3, f"Shape {shape} is wrong length!"
     height, width = shape[:2]
     seeds = np.zeros([batch_size, height, width, state_size])
     seeds[:, height // 2, width // 2, 3:] += 1
-    seeds = tf.convert_to_tensor(seeds)
+    seeds = tf.convert_to_tensor(seeds, dtype=tf.float32)
     return seeds
 
 def to_alpha(image):
@@ -50,5 +51,3 @@ def to_rgb(image):
     rgb = image[:, :, :, :3]
     alpha = to_alpha(image)
     return 1.0 - alpha + rgb
-
-
