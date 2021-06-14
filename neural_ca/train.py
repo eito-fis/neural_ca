@@ -24,13 +24,13 @@ EMOJI = "🦎"
 LR = 2e-3
 POOL_SIZE = 1024
 
-def log(i, loss, model, image):
+def log(i, loss, model, pool):
     log_data = {
         "step": i,
         "loss": loss,
     }
     if i % VAL_STEPS == 0:
-        video = util.video.make_video(model, image, VIDEO_STEPS, STATE_SIZE)
+        video = util.video.make_video(model, pool, VIDEO_STEPS)
         clip = mpy.ImageSequenceClip(video, fps=16)
         filename = os.path.join("logging", wandb.run.name, str(i.numpy()) + ".mp4")
         clip.write_videofile(filename, logger=None)
@@ -55,7 +55,7 @@ def train(model, optimizer, train_steps, image, pool):
         grads = [g / (tf.norm(g) + 1e-8) for g in grads]
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
         pool.update(cells, idxs)
-        log(i, loss, model, image)
+        log(i, loss, model, pool)
 
 def build_model():
     model = AutomataModel(STATE_SIZE, drop_prob=DROP_PROB)

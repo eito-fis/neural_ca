@@ -32,15 +32,6 @@ def load_emoji(emoji):
     processed_emoji = process_image(emoji)
     return processed_emoji
 
-def make_seeds(shape, batch_size, state_size):
-    """ Makes batch of seeds """
-    assert len(shape) == 2 or len(shape) == 3, f"Shape {shape} is wrong length!"
-    height, width = shape[:2]
-    seeds = np.zeros([batch_size, height, width, state_size])
-    seeds[:, height // 2, width // 2, 3:] += 1
-    seeds = tf.convert_to_tensor(seeds, dtype=tf.float32)
-    return seeds
-
 def to_alpha(image):
     return tf.clip_by_value(image[..., 3:4], 0.0, 1.0)
 
