@@ -1,7 +1,6 @@
 import pytest
 import tensorflow as tf
 
-from neural_ca import util
 from neural_ca.sample_pool import SamplePool
 
 @pytest.fixture
@@ -33,13 +32,21 @@ class TestSamplePool:
         with pytest.raises(AssertionError):
             pool.sample(100)
 
+    @pytest.mark.parametrize("shape", [(64, 64, 3), (128, 128, 3)])
+    @pytest.mark.parametrize("state_size", [16, 32])
+    @pytest.mark.parametrize("batch_size", [1, 8])
+    def test_build_seeds(self, make_pool, shape, batch_size, state_size):
+        pool = make_pool(32, shape, state_size)
+        seeds = pool.build_seeds(batch_size)
+        assert tf.reduce_sum(seeds).numpy() == batch_size * (state_size - 3)
+
     def test_sample_fresh_seed(self, make_pool):
         shape, state_size = (64, 64, 3), 16
         pool = make_pool(16, shape, state_size)
         pool.pool = tf.ones(pool.pool.shape)
 
         sample, _ = pool.sample(1)
-        fresh_seed = util.image.make_seeds(shape, 1, state_size)
+        fresh_seed = pool.build_seeds(1)
 
         assert sample.shape == fresh_seed.shape
         assert tf.math.reduce_all(tf.math.equal(sample, fresh_seed))

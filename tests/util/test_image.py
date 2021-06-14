@@ -1,8 +1,7 @@
 import pytest
-import numpy as np
 
 from neural_ca.util.image import (load_image_from_url, process_image, load_emoji,
-                            make_seeds, to_rgb, to_rgba)
+                                  to_rgb, to_rgba)
 
 @pytest.fixture
 def example_emoji():
@@ -49,13 +48,6 @@ class TestImages:
     def test_load_emoji(self, example_emoji):
         load_emoji(example_emoji)
         assert True
-
-    @pytest.mark.parametrize("batch_size, state_size", [(4, 4), (16, 16), (64, 64)])
-    def test_make_seeds(self, example_image, batch_size, state_size):
-        example_image_shape = np.array(example_image).shape
-        seeds = make_seeds(example_image_shape, batch_size, state_size)
-        seeds = seeds.numpy()
-        assert np.sum(seeds) == batch_size * (state_size - 3)
 
     def test_to_rgb(self, example_processed_image_fixed):
         rgb_image = to_rgb(example_processed_image_fixed[None, :])
