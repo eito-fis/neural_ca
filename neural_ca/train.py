@@ -38,19 +38,19 @@ def log(i, loss, model, pool):
         tqdm.write(f" - Loss: {loss}, {filename} logged")
     wandb.log(log_data)
 
-def calc_loss(cells, image):
-    pixel_delta = util.image.to_rgba(cells) - image
+def calc_loss(cells, target):
+    pixel_delta = util.image.to_rgba(cells) - target
     loss = tf.reduce_mean(tf.square(pixel_delta))
     return loss
 
-def train(model, optimizer, train_steps, image, pool):
+def train(model, optimizer, train_steps, pool):
     for i in tqdm(tf.range(train_steps), desc="Training ", leave=True):
-        cells, idxs = pool.sample(BATCH_SIZE)
+        cells, target, idxs = pool.sample(BATCH_SIZE)
         gen_steps = tf.random.uniform([], GEN_RANGE[0], GEN_RANGE[1], tf.int32)
         with tf.GradientTape() as tape:
             for _ in tf.range(gen_steps):
                 cells = model(cells)
-            loss = calc_loss(cells, image)
+            loss = calc_loss(cells, target)
         grads = tape.gradient(loss, model.trainable_weights)
         grads = [g / (tf.norm(g) + 1e-8) for g in grads]
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
@@ -68,8 +68,8 @@ def build_optimizer():
     optimizer = tf.keras.optimizers.Adam(lr_scheduler)
     return optimizer
 
-def build_pool(shape):
-    pool = SamplePool(POOL_SIZE, shape, STATE_SIZE)
+def build_pool():
+    pool = SamplePool(POOL_SIZE, STATE_SIZE, EMOJI)
     return pool
 
 def main(args):
@@ -95,10 +95,9 @@ def main(args):
 
     model = build_model()
     optimizer = build_optimizer()
-    image = util.image.load_emoji(EMOJI)
-    pool = build_pool(image.shape)
+    pool = build_pool()
     os.makedirs(os.path.join("logging", wandb.run.name), exist_ok=True)
-    train(model, optimizer, args.train_steps, image, pool)
+    train(model, optimizer, args.train_steps, pool)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
