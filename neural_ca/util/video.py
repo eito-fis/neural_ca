@@ -27,8 +27,9 @@ def load_video(path, size=64):
         frame = np.concatenate((frame, alpha[:, :, None]), axis=2)
         frame = Image.fromarray(frame, mode="RGBA")
         frame = util.image.process_image(frame, size=size)
+        return frame
 
-    with VideoFileClip(path, audio=False) as video:
+    with VideoFileClip(path, audio=False, target_resolution=(size, size)) as video:
         # Each frame is [height, width, 4]
         frames = [process_frame(frame) for frame in video.iter_frames()]
     # Now [n_frames, height, width, 3]

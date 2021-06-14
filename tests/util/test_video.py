@@ -23,5 +23,5 @@ class TestVideo:
 
     @pytest.mark.parametrize("size", [8, 32, 64])
     def test_load_video(self, size, video_path):
-        pass
-        # load_video(video_path, size=size)
+        video = load_video(video_path, size=size)
+        assert video.shape == (368, size, size, 4)
