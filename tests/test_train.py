@@ -17,7 +17,7 @@ class TestTrain:
         assert True
 
     def test_build_pool(self):
-        build_pool((64, 64, 3))
+        build_pool()
         assert True
 
     def test_calc_loss(self):

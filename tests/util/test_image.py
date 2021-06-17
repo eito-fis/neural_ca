@@ -4,10 +4,6 @@ from neural_ca.util.image import (load_image_from_url, process_image, load_emoji
                                   to_rgb, to_rgba)
 
 @pytest.fixture
-def example_emoji():
-    return "🦎"
-
-@pytest.fixture
 def example_url():
     return "https://raw.githubusercontent.com/googlefonts/noto-emoji/master/png/128/emoji_u1f98e.png"
 
