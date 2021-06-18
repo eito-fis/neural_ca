@@ -1,8 +1,7 @@
 import pytest
-import numpy as np
 
 from neural_ca.train import build_model
-from neural_ca.sample_pool import SamplePool
+from neural_ca.pools import SamplePool
 from neural_ca.util.video import make_video, load_video
 
 @pytest.fixture

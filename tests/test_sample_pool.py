@@ -1,7 +1,7 @@
 import pytest
 import tensorflow as tf
 
-from neural_ca.sample_pool import SamplePool
+from neural_ca.pools import SamplePool
 
 @pytest.fixture
 def make_pool(example_emoji):

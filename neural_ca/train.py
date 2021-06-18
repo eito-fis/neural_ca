@@ -8,7 +8,7 @@ import tensorflow as tf
 import moviepy.editor as mpy
 
 from neural_ca import util
-from neural_ca.sample_pool import SamplePool
+from neural_ca.pools import SamplePool
 from neural_ca.models.automata import AutomataModel
 
 ### CONSTANTS ###
