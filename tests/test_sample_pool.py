@@ -3,16 +3,6 @@ import tensorflow as tf
 
 from neural_ca.pools import SamplePool
 
-@pytest.fixture
-def make_pool(example_emoji):
-    def _func(pool_size, state_size):
-        return SamplePool(
-            pool_size=pool_size,
-            state_size=state_size,
-            emoji=example_emoji,
-        )
-    return _func
-
 @pytest.mark.pool
 class TestSamplePool:
     # TODO: Add shape back in once config is created

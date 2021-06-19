@@ -1,22 +1,11 @@
 import pytest
 
 from neural_ca.train import build_model
-from neural_ca.pools import SamplePool
 from neural_ca.util.video import make_video, load_video
 
 @pytest.fixture
 def video_path():
     return "data/waves.mp4"
-
-@pytest.fixture
-def make_pool(example_emoji):
-    def _func(pool_size, state_size):
-        return SamplePool(
-            pool_size=pool_size,
-            state_size=state_size,
-            emoji=example_emoji
-        )
-    return _func
 
 @pytest.mark.utils
 class TestVideo:
