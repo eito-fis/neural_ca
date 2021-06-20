@@ -41,16 +41,17 @@ class VideoPool(SamplePool):
         assert self.pool_size <= video_length, "Pool size larger than video"
         pool = self.video[:self.pool_size * self.frame_stride:self.frame_stride]
         pool = tf.convert_to_tensor(pool, dtype=tf.float32)
+        pool = self._add_state(pool, self.state_size)
         return pool
 
     def build_target(self, idxs):
         start, end = self.skip_range
         skip_steps = tf.random.uniform(tf.shape(idxs), start, end, tf.int32)
         target_idxs = idxs + skip_steps
-        wrapping_mask = target_idxs >= self.pool_size
+        wrapping_mask = tf.cast(target_idxs >= self.pool_size, tf.int32)
         target_idxs -= wrapping_mask * self.pool_size
         target = tf.gather(self.pool, target_idxs, axis=0)
-        return target.data
+        return util.image.to_rgba(target)
 
     def build_seeds(self, batch_size=None, sample_idxs=None):
         assert batch_size is not None or sample_idxs is not None, (
@@ -61,7 +62,16 @@ class VideoPool(SamplePool):
         sample_idxs *= self.frame_stride
         seeds = tf.gather(self.video, sample_idxs, axis=0)
         seeds = tf.convert_to_tensor(seeds, dtype=tf.float32)
+        seeds = self._add_state(seeds, self.state_size)
         return seeds
+
+    @staticmethod
+    def _add_state(batch, state_size):
+        batch_shape = tf.shape(batch)
+        length, height, width, depth = batch_shape
+        state = tf.ones((length, height, width, state_size - depth))
+        batch = tf.concat((batch, state), axis=-1)
+        return batch
 
     @property
     def video(self):

@@ -93,6 +93,10 @@ def main(args):
         "--train_steps",
         type=int,
         default=2000)
+    parser.add_argument(
+        "--pool_type",
+        type=str,
+        default="EMOJI")
     args = parser.parse_args(args)
 
     wandb.init(
@@ -102,7 +106,7 @@ def main(args):
 
     model = build_model()
     optimizer = build_optimizer()
-    pool = build_pool()
+    pool = build_pool(pool_type=args.pool_type)
     os.makedirs(os.path.join("logging", wandb.run.name), exist_ok=True)
     train(model, optimizer, args.train_steps, pool)
 
