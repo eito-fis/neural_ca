@@ -3,10 +3,6 @@ import pytest
 from neural_ca.train import build_model
 from neural_ca.util.video import make_video, load_video
 
-@pytest.fixture
-def video_path():
-    return "data/waves.mp4"
-
 @pytest.mark.utils
 class TestVideo:
     #TODO: Update the state_size when we add a config

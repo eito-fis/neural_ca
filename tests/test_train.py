@@ -16,8 +16,12 @@ class TestTrain:
         build_optimizer()
         assert True
 
-    def test_build_pool(self):
+    def test_build_pool_emoji(self):
         build_pool()
+        assert True
+
+    def test_build_pool_video(self):
+        build_pool(pool_type="VIDEO")
         assert True
 
     def test_calc_loss(self):

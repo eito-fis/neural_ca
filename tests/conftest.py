@@ -7,6 +7,10 @@ def example_emoji():
     return "🦎"
 
 @pytest.fixture
+def video_path():
+    return "data/waves.mp4"
+
+@pytest.fixture
 def make_pool(example_emoji):
     def _func(pool_size, state_size):
         return SamplePool(

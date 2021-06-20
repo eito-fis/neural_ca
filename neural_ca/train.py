@@ -8,7 +8,7 @@ import tensorflow as tf
 import moviepy.editor as mpy
 
 from neural_ca import util
-from neural_ca.pools import SamplePool
+from neural_ca.pools import SamplePool, VideoPool
 from neural_ca.models.automata import AutomataModel
 
 ### CONSTANTS ###
@@ -22,7 +22,11 @@ VIDEO_STEPS = 256
 GEN_RANGE = (64, 96)
 EMOJI = "🦎"
 LR = 2e-3
-POOL_SIZE = 1024
+POOL_SIZE = 368
+
+FRAME_STRIDE = 1
+SKIP_RANGE = (8, 16)
+VIDEO = "data/waves.mp4"
 
 def log(i, loss, model, pool):
     log_data = {
@@ -68,8 +72,11 @@ def build_optimizer():
     optimizer = tf.keras.optimizers.Adam(lr_scheduler)
     return optimizer
 
-def build_pool():
-    pool = SamplePool(POOL_SIZE, STATE_SIZE, EMOJI)
+def build_pool(pool_type="EMOJI"):
+    if pool_type == "EMOJI":
+        pool = SamplePool(POOL_SIZE, STATE_SIZE, EMOJI)
+    else:
+        pool = VideoPool(FRAME_STRIDE, SKIP_RANGE, POOL_SIZE, STATE_SIZE, VIDEO)
     return pool
 
 def main(args):

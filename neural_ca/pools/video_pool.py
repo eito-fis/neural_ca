@@ -5,9 +5,9 @@ from neural_ca.pools import SamplePool
 
 class VideoPool(SamplePool):
     def __init__(self, frame_stride, skip_range, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.frame_stride = frame_stride
         self.skip_range = skip_range
+        super().__init__(*args, **kwargs)
 
     def sample(self, batch_size):
         sample, sample_idxs = self.build_sample(batch_size)
@@ -37,9 +37,9 @@ class VideoPool(SamplePool):
         return self.data.shape[1:]
 
     def build_pool(self):
-        video_length = self.video.shape[0] // self.skip_stride
+        video_length = self.video.shape[0] // self.frame_stride
         assert self.pool_size <= video_length, "Pool size larger than video"
-        pool = self.video[:self.pool_size * self.skip_stride:self.skip_stride]
+        pool = self.video[:self.pool_size * self.frame_stride:self.frame_stride]
         pool = tf.convert_to_tensor(pool, dtype=tf.float32)
         return pool
 
@@ -58,7 +58,7 @@ class VideoPool(SamplePool):
         if sample_idxs is None:
             idxs = tf.range(0, self.pool_size)
             sample_idxs = tf.random.shuffle(idxs)[:batch_size]
-        sample_idxs *= self.skip_stride
+        sample_idxs *= self.frame_stride
         seeds = tf.gather(self.video, sample_idxs, axis=0)
         seeds = tf.convert_to_tensor(seeds, dtype=tf.float32)
         return seeds
