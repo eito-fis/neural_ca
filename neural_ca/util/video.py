@@ -20,12 +20,8 @@ def make_video(model, pool, steps):
 
 def load_video(path, size=64):
     def process_frame(frame):
-        # Add fake alpha channel to normal images
-        # [height, width]
-        alpha = np.ones_like(frame[:, :, 0])
-        # [height, width, 4]
-        frame = np.concatenate((frame, alpha[:, :, None]), axis=2)
-        frame = Image.fromarray(frame, mode="RGBA")
+        frame = Image.fromarray(frame)
+        frame = frame.convert("RGBA")
         frame = util.image.process_image(frame, size=size)
         frame = frame[:, :, :4]
         return frame
