@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 
 from neural_ca import util
@@ -31,15 +32,18 @@ class VideoPool(SamplePool):
         return sample, target, sample_idxs
 
     def build_data(self, data):
-        return util.video.load_video(data)
+        video = util.video.load_video(data)
+        video = video[::self.frame_stride]
+        repeat = self.pool_size // video.shape[0]
+        if repeat >= 1:
+            video = np.repeat(video, repeat + 1, axis=0)
+        return video
 
     def build_shape(self):
         return self.data.shape[1:]
 
     def build_pool(self):
-        video_length = self.video.shape[0] // self.frame_stride
-        assert self.pool_size <= video_length, "Pool size larger than video"
-        pool = self.video[:self.pool_size * self.frame_stride:self.frame_stride]
+        pool = self.video[:self.pool_size]
         pool = tf.convert_to_tensor(pool, dtype=tf.float32)
         pool = self._add_state(pool, self.state_size)
         return pool
@@ -59,7 +63,6 @@ class VideoPool(SamplePool):
         if sample_idxs is None:
             idxs = tf.range(0, self.pool_size)
             sample_idxs = tf.random.shuffle(idxs)[:batch_size]
-        sample_idxs *= self.frame_stride
         seeds = tf.gather(self.video, sample_idxs, axis=0)
         seeds = tf.convert_to_tensor(seeds, dtype=tf.float32)
         seeds = self._add_state(seeds, self.state_size)

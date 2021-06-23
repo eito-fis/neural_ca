@@ -19,13 +19,13 @@ STATE_SIZE = 16
 DROP_PROB = 0.5
 VAL_STEPS = 250
 VIDEO_STEPS = 256
-GEN_RANGE = (64, 96)
+GEN_RANGE = (1, 4)
 EMOJI = "🦎"
 LR = 2e-3
-POOL_SIZE = 368
+POOL_SIZE = 1024
 
 FRAME_STRIDE = 1
-SKIP_RANGE = (8, 16)
+SKIP_RANGE = (1, 16)
 VIDEO = "data/waves.mp4"
 
 def log(i, loss, model, pool):
