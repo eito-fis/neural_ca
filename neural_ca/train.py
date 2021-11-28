@@ -15,7 +15,7 @@ from neural_ca.models.automata import AutomataModel
 HEIGHT = 64
 WIDTH = 64
 BATCH_SIZE = 16
-STATE_SIZE = 32
+STATE_SIZE = 16
 DROP_PROB = 0.5
 VAL_STEPS = 250
 VIDEO_STEPS = 736
