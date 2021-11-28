@@ -65,6 +65,10 @@ def build_model():
     model = AutomataModel(STATE_SIZE, drop_prob=DROP_PROB)
     return model
 
+def save_model(model, save_dir):
+    os.makedirs(os.path.dirname(save_dir), exist_ok=True)
+    model.save(save_dir)
+
 def build_optimizer():
     lr_scheduler = tf.optimizers.schedules.PiecewiseConstantDecay(
         [2000], [LR, LR * 0.1]
@@ -83,6 +87,10 @@ def main(args):
     parser = argparse.ArgumentParser('Train Neural CA')
     parser.add_argument(
         "--run_name",
+        type=str,
+        default=None)
+    parser.add_argument(
+        "--save",
         type=str,
         default=None)
     parser.add_argument(
@@ -109,6 +117,8 @@ def main(args):
     pool = build_pool(pool_type=args.pool_type)
     os.makedirs(os.path.join("logging", wandb.run.name), exist_ok=True)
     train(model, optimizer, args.train_steps, pool)
+    if args.save:
+        save_model(model, args.save)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
