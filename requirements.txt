@@ -24,10 +24,12 @@ imageio==2.9.0
 imageio-ffmpeg==0.4.2
 importlib-metadata==3.3.0
 iniconfig==1.1.1
+keras==2.7.0
 Keras-Preprocessing==1.1.2
+libclang==12.0.0
 Markdown==3.3.3
 moviepy==1.0.3
--e git+git@github.com:eito-fis/neural_ca.git@b4caa6d040f06d044f840e67bb448bb0546a79f6#egg=neural_ca
+-e git+ssh://git@github.com/eito-fis/neural_ca.git@f34e8bf8c6ba72317b74c532b586a2b29f081680#egg=neural_ca
 numpy==1.19.4
 oauthlib==3.1.0
 opt-einsum==3.3.0
@@ -55,11 +57,13 @@ shortuuid==1.0.1
 six==1.15.0
 smmap==3.0.4
 subprocess32==3.5.4
-tensorboard==2.2.2
+tensorboard==2.7.0
+tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.7.0
-tensorflow==2.2.0
-tensorflow-estimator==2.2.0
+tensorflow==2.7.0
+tensorflow-estimator==2.7.0
 tensorflow-gpu==2.2.0
+tensorflow-io-gcs-filesystem==0.22.0
 termcolor==1.1.0
 toml==0.10.2
 tqdm==4.55.0
