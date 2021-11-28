@@ -53,7 +53,7 @@ class SamplePool:
     def build_target(self):
         return self.data
 
-    def build_seeds(self, batch_size):
+    def build_seeds(self, batch_size=1):
         """ Makes batch of seeds """
         height, width = self.shape[:2]
         seeds = np.zeros([batch_size, height, width, self.state_size])

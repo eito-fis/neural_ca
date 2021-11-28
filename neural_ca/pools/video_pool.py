@@ -9,22 +9,23 @@ class VideoPool(SamplePool):
         self.frame_stride = frame_stride
         self.skip_range = skip_range
         super().__init__(*args, **kwargs)
+        self.target_idxs = tf.range(self.pool_size)
 
     def sample(self, batch_size):
         sample, sample_idxs = self.build_sample(batch_size)
 
-        # Replace one sampled seed with a fresh seed
+        num_replace = 1
         idxs = tf.range(0, self.pool_size)
-        replace_idx = tf.random.shuffle(idxs)[:1]
+        replace_idx = tf.random.shuffle(idxs)[:num_replace]
         fresh_seed = self.build_seeds(sample_idxs=replace_idx)
         sample = tf.tensor_scatter_nd_update(
             sample,
-            tf.constant([[0]]),
+            tf.constant(tf.range(num_replace))[:, None],
             fresh_seed,
         )
         sample_idxs = tf.tensor_scatter_nd_update(
             sample_idxs,
-            tf.constant([[0]]),
+            tf.constant(tf.range(num_replace))[:, None],
             replace_idx,
         )
 
@@ -48,16 +49,28 @@ class VideoPool(SamplePool):
         pool = self._add_state(pool, self.state_size)
         return pool
 
-    def build_target(self, idxs):
-        start, end = self.skip_range
-        skip_steps = tf.random.uniform(tf.shape(idxs), start, end, tf.int32)
-        target_idxs = idxs + skip_steps
-        wrapping_mask = tf.cast(target_idxs >= self.pool_size, tf.int32)
-        target_idxs -= wrapping_mask * self.pool_size
-        target = tf.gather(self.pool, target_idxs, axis=0)
+    def build_target(self, sample_idxs):
+        target_idxs = self.build_target_idxs(sample_idxs)
+        target = tf.gather(self.video, target_idxs, axis=0)
         return util.image.to_rgba(target)
 
-    def build_seeds(self, batch_size=None, sample_idxs=None):
+    def build_target_idxs(self, sample_idxs):
+        batch_targets = tf.gather(self.target_idxs, sample_idxs, axis=0)
+        start, end = self.skip_range
+        skip_steps = tf.random.uniform(tf.shape(batch_targets), start, end, tf.int32)
+        target_idxs = batch_targets + skip_steps
+        wrapping_mask = tf.cast(target_idxs >= self.pool_size, tf.int32)
+        target_idxs -= wrapping_mask * self.pool_size
+
+        self.target_idxs = tf.tensor_scatter_nd_update(
+            self.target_idxs,
+            sample_idxs[:, None],
+            target_idxs
+        )
+
+        return target_idxs
+
+    def build_seeds(self, batch_size=None, sample_idxs=[0]):
         assert batch_size is not None or sample_idxs is not None, (
             "batch_size or sample_idxs must be specified")
         if sample_idxs is None:

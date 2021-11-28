@@ -11,7 +11,7 @@ def make_video(model, pool, steps):
         unbatched_cell = clipped_cell[0, :, :, :]
         return unbatched_cell
 
-    cell = pool.build_seeds(1)
+    cell = pool.build_seeds()
     video = [process_cell(cell)]
     for _ in range(steps - 1):
         cell = model(cell)
