@@ -3,10 +3,8 @@ import os
 import pytest
 import numpy as np
 
-from context import neural_ca
-from neural_ca.util import load_emoji
-from neural_ca.train import (make_video, build_model, build_optimizer,
-                             build_pool, calc_loss, main)
+from neural_ca.util.image import load_emoji
+from neural_ca.train import (build_model, build_optimizer, build_pool, calc_loss, main)
 
 @pytest.mark.train
 class TestTrain:
@@ -18,8 +16,12 @@ class TestTrain:
         build_optimizer()
         assert True
 
-    def test_build_pool(self):
-        build_pool((64, 64, 3))
+    def test_build_pool_emoji(self):
+        build_pool()
+        assert True
+
+    def test_build_pool_video(self):
+        build_pool(pool_type="VIDEO")
         assert True
 
     def test_calc_loss(self):
@@ -47,12 +49,3 @@ class TestTrain:
                 "--run_name", "unittest"]
         main(args)
         assert True
-
-    @pytest.mark.parametrize("size, steps", [(32, 128), (64, 256), (128, 512)])
-    def test_make_video(self, size, steps):
-        model = build_model()
-        img = np.zeros((size, size, 4))
-        video = make_video(model, img, steps)
-        assert len(video) == steps
-        for frame in video:
-            assert frame.shape == (size, size, 3)

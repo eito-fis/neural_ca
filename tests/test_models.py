@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
 
-from context import neural_ca
 from neural_ca.models.automata import AutomataModel
 
 @pytest.fixture
