@@ -29,7 +29,6 @@ Keras-Preprocessing==1.1.2
 libclang==12.0.0
 Markdown==3.3.3
 moviepy==1.0.3
--e git+ssh://git@github.com/eito-fis/neural_ca.git@f34e8bf8c6ba72317b74c532b586a2b29f081680#egg=neural_ca
 numpy==1.19.4
 oauthlib==3.1.0
 opt-einsum==3.3.0
