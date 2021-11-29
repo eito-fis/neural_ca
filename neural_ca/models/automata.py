@@ -23,7 +23,7 @@ class AutomataModel(tf.keras.Model):
         self.filters = self.build_filters()
         self.filters.trainable = False
         self.dense = tf.keras.layers.Conv2D(
-            filters=48,
+            filters=96,
             kernel_size=1,
             padding="Same",
             activation=tf.keras.activations.relu
