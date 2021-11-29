@@ -14,10 +14,11 @@ class AutomataModel(tf.keras.Model):
         out (keras.Conv2D): Output dense layer for each pixel, implemented as
             as convolutional layer with 16 filters
     """
-    def __init__(self, state_size, drop_prob=0.5):
+    def __init__(self, state_size, drop_prob=0.5, stochastic=True):
         super().__init__()
         self.state_size = state_size
         self.drop_prob = drop_prob
+        self.stochastic = stochastic
         assert self.state_size >= 4, "Must have state size of at least 4!"
 
         self.filters = self.build_filters()
@@ -95,8 +96,10 @@ class AutomataModel(tf.keras.Model):
         update_vec = self.dense(update_vec)
         update_vec = self.out(update_vec)
 
-        stochastic_mask = self.build_stochastic_mask(cell_state)
-        cell_state += update_vec * stochastic_mask
+        if self.stochastic:
+            stochastic_mask = self.build_stochastic_mask(cell_state)
+            update_vec *= stochastic_mask
+        cell_state += update_vec
 
         post_life_mask = self.build_live_mask(cell_state)
         # Mask if cell doesn't neighbhour alive cell before and after update

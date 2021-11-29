@@ -48,7 +48,7 @@ def calc_loss(cells, target):
     return loss
 
 def train(model, optimizer, train_steps, pool):
-    for i in tqdm(tf.range(train_steps), desc="Training ", leave=True):
+    for i in tqdm(tf.range(train_steps + 1), desc="Training ", leave=True):
         cells, target, idxs = pool.sample(BATCH_SIZE)
         gen_steps = tf.random.uniform([], GEN_RANGE[0], GEN_RANGE[1], tf.int32)
         with tf.GradientTape() as tape:
@@ -61,13 +61,17 @@ def train(model, optimizer, train_steps, pool):
         pool.update(cells, idxs)
         log(i, loss, model, pool)
 
-def build_model():
-    model = AutomataModel(STATE_SIZE, drop_prob=DROP_PROB)
+def build_model(stochastic):
+    model = AutomataModel(
+        STATE_SIZE,
+        drop_prob=DROP_PROB,
+        stochastic=stochastic
+    )
     return model
 
 def save_model(model, save_dir):
-    os.makedirs(os.path.dirname(save_dir), exist_ok=True)
-    model.save(save_dir)
+    os.makedirs(save_dir, exist_ok=True)
+    model.save_weights(os.path.join(save_dir, 'model'))
 
 def build_optimizer():
     lr_scheduler = tf.optimizers.schedules.PiecewiseConstantDecay(
@@ -105,6 +109,11 @@ def main(args):
         "--pool_type",
         type=str,
         default="EMOJI")
+    parser.add_argument(
+        '--stochastic',
+        action="store_true",
+        default=False
+    )
     args = parser.parse_args(args)
 
     wandb.init(
@@ -112,7 +121,7 @@ def main(args):
         name=args.run_name
     )
 
-    model = build_model()
+    model = build_model(stochastic=args.stochastic)
     optimizer = build_optimizer()
     pool = build_pool(pool_type=args.pool_type)
     os.makedirs(os.path.join("logging", wandb.run.name), exist_ok=True)
